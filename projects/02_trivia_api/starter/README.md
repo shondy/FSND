@@ -44,7 +44,7 @@ Install dependencies for the backend:
                          
 4. **Prepare the flask app to run and run it**
    ```
-   set FLASK_APP=flaskr\\_\_init\_\_
+   set FLASK_APP=flaskr __init__
    flask run
    ```
 
@@ -52,7 +52,7 @@ The `/backend` directory contains a Flask and SQLAlchemy server.
 The endpoints are defined in `/backend/flaskr/__init__.py`, DB models and SQLAlchemy 
 setup - in `/backend/models.py`. 
 
-####Testing
+#### Testing
 To run the unit tests, run
 ```
 createdb -U postgres trivia_test
@@ -94,7 +94,7 @@ a difficulty (on a scale of 1 to 6), and an answer.
 ##### GET /api/categories
 Returns a list of category objects and success value
 
-Sample: curl http://127.0.0.1:5000/api/categories
+*Sample*: curl http://127.0.0.1:5000/api/categories
 ```
 {
   "categories": [
@@ -132,7 +132,7 @@ success value, and total number of questions in database.
 Results are paginated in groups of 10. 
 Append URL parameter ?page=<num> to choose page number (default page number is 1)
 
-Sample: curl http://127.0.0.1:5000/api/questions?page=2
+*Sample*: curl http://127.0.0.1:5000/api/questions?page=2
 ```
 {
   "categories": [
@@ -235,7 +235,7 @@ Sample: curl http://127.0.0.1:5000/api/questions?page=2
 Deletes the question of the given id if it exists. Returns the id of 
 the deleted question and a success value.
 
-Sample: curl -X DELETE http://127.0.0.1:5000/api/questions/19
+*Sample*: curl -X DELETE http://127.0.0.1:5000/api/questions/19
 ```
 {
     'deleted': 19,
@@ -253,7 +253,7 @@ Creating a new question object using the submitted question, answer, category, a
 difficulty as application/json type. Returns a success status and id of newly created 
 question if successful
 
-Sample: curl http://127.0.0.1:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"question": "What is the highest active volcano in Europe?", "answer": "Etna", "category": 3, "difficulty": 2}'
+*Sample*: curl http://127.0.0.1:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"question": "What is the highest active volcano in Europe?", "answer": "Etna", "category": 3, "difficulty": 2}'
 ```
 {
     "success": true,
@@ -265,7 +265,7 @@ Request contains search term data as application/json type
 Returns a success status, a list of all question objects for whom the search term 
 is a substring of the question, and total number of questions 
 
-Sample: curl http://localhost:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "name"}'
+*Sample*: curl http://localhost:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "name"}'
 ```
 {
   "questions": [
@@ -293,7 +293,7 @@ Requests all the questions based on a particular category (category_id).
 Returns a success status, the list of questions for requested category (without pagination), 
 the number of questions in this category, and category_id.
 
-Sample: curl http://127.0.0.1:5000/api/categories/5/questions
+*Sample*: curl http://127.0.0.1:5000/api/categories/5/questions
 ```
 {
   "currentCategory": 5,
@@ -334,7 +334,7 @@ Returns a success status and, if successful, a random question.
 If there are no more questions to return in that category, the API returns only a
 success status (without a question). That tells the frontend the quiz is over.
 
-Sample: get a question from all categories (category 0) with an empty list of previous questions 
+*Sample*: get a question from all categories (category 0) with an empty list of previous questions 
 (as it at happens at the beginning of the game):
  
 curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [], quiz_category: {type: "click", id: 0}}'
@@ -350,7 +350,7 @@ curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/jso
   "success": true
 }
 ```
-Sample: get a question from the Entertainment category (category 5) when there are no more questions 
+*Sample*: get a question from the Entertainment category (category 5) when there are no more questions 
 left in the category: 
 
 curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [2, 4, 6], quiz_category: {type: "Entertainment", id: "5"}}'

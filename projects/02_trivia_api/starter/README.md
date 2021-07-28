@@ -331,10 +331,11 @@ If a category isn't specified (quiz_category equal to 0) than a question is rand
 Request contains a quiz category and a list of previously asked questions encoded 
 in application/json format.
 Returns a success status and, if successful, a random question. 
-If there are no more questions to return in that category, the API just returns 
-success, but with no question key/value pair. That tells the frontend the quiz is over.
+If there are no more questions to return in that category, the API returns only a
+success status (without a question). That tells the frontend the quiz is over.
 
-Sample of getting a question from all categories (category 0) with empty list of previous questions (at the beginning of the game):
+Sample: get a question from all categories (category 0) with an empty list of previous questions 
+(as it at happens at the beginning of the game):
  
 curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [], quiz_category: {type: "click", id: 0}}'
 ```
@@ -349,8 +350,8 @@ curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/jso
   "success": true
 }
 ```
-Sample of getting a question from the Entertainment category (category 5), and there are no more questions 
-left in that category: 
+Sample: get a question from the Entertainment category (category 5) when there are no more questions 
+left in the category: 
 
 curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [2, 4, 6], quiz_category: {type: "Entertainment", id: "5"}}'
 ```

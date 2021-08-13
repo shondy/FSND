@@ -261,7 +261,8 @@ question if successful
 }
 ```
 **Searching questions based on a search term**
-Request contains search term data as application/json type
+Request contains search term data as application/json type.
+Search term length can't exceed 1000 symbols.
 Returns a success status, a list of all question objects for whom the search term 
 is a substring of the question, and total number of questions 
 

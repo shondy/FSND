@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
 from models import setup_db, Question, Category, db
 from sqlalchemy import func
+from sqlalchemy.sql import text as sa_text
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -16,7 +17,10 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgresql://{}:{}@{}/{}".format('helen', 'pop23', 'localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}:{}@{}/{}".format('helen',
+                                                               'pop23',
+                                                               'localhost:5432',
+                                                               self.database_name)
         setup_db(self.app, self.database_path)
 
         self.new_question = {
@@ -40,11 +44,6 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
-
     # Unit Tests
 
     def test_get_categories(self):
@@ -54,6 +53,22 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['categories']), 6)
+
+    def test_404_get_categories_from_empty_table(self):
+        """Test rising of 404 error if requested all categories from
+        empty Category table
+        """
+        num_rows_deleted = db.session.query(Category).delete()
+        #db.session.commit()
+        db.session.flush()
+        res = self.client().get('/api/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+        db.session.rollback()
 
     def test_get_all_questions(self):
         """Get all questions for first page (default value for a page number), check that we
@@ -121,11 +136,19 @@ class TriviaTestCase(unittest.TestCase):
         """Test searching for a term in questions.question"""
         res = self.client().post('/api/questions', json={'searchTerm': 'What'})
         data = json.loads(res.data)
-
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['totalQuestions'])
         self.assertEqual(len(data['questions']), 8)
         self.assertEqual(data['questions'][0]['id'], 9)
+
+    def test_400_get_questions_containing_long_searchTerm(self):
+        """Test searching for a term longer than 1000 symbols
+        in questions.question, should return 400 error"""
+        res = self.client().post('/api/questions', json={'searchTerm': 'a'*1001})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'bed request')
 
     def test_delete_question(self):
         """Test deleting of the question with maximum id"""
@@ -169,33 +192,35 @@ class TriviaTestCase(unittest.TestCase):
     def test_create_quiz(self):
         """Test finding a random question for a quiz from the given category which
         doesn't belong to the list of given questions  """
-        quiz_category = {"type": "History", "id": "4"}
+        quiz_category = {"type": "History", "id": 4}
         previous_questions = [5, 9, 16, 17]
         res = self.client().post('/api/quizzes', \
-                                 json={"previousQuestions": previous_questions, \
+                                 json={"previous_questions": previous_questions, \
                                        "quiz_category": quiz_category})
 
         data = json.loads(res.data)
+        #print("data", data)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question']['id'] in [12, 23])
 
-    def test_create_quiz_failure(self):
-        """Test failure of creating a quiz if all questions from given category belong to
-          the list of previous questions that can't be used for quiz """
-        quiz_category = {"type": "History", "id": "4"}
+    def test_quiz_is_over(self):
+        """Test returns only a success status without a question
+        if all questions from a given category belong to
+        the list of previous questions that can't be used for quiz """
+        quiz_category = {"type": "History", "id": 4}
         previous_questions = [5, 9, 12, 23, 16, 17]
         res = self.client().post('/api/quizzes', \
-                                 json={"previousQuestions": previous_questions, \
+                                 json={"previous_questions": previous_questions, \
                                        "quiz_category": quiz_category})
-
         data = json.loads(res.data)
-        self.assertEqual(data['success'], False)
+        self.assertEqual(data['success'], True)
+        self.assertNotIn('question', data)
 
     def test_create_quiz_without_previous_questions(self):
         """Test finding a random question for quiz from the given category without specifying
         a list of questions that can not be chosen """
-        quiz_category = {"type": "History", "id": "4"}
-        res = self.client().post('/api/quizzes', json={"previousQuestions": [], \
+        quiz_category = {"type": "History", "id": 4}
+        res = self.client().post('/api/quizzes', json={"previous_questions": [], \
                                                        "quiz_category": quiz_category})
 
         data = json.loads(res.data)
@@ -205,11 +230,11 @@ class TriviaTestCase(unittest.TestCase):
     def test_create_quiz_without_category(self):
         """Test finding a random question for a quiz without specific category (id = 0)
          that doesn't belong to the list of given questions """
-        quiz_category = {"id": "0"}
+        quiz_category = {"id": 0}
 
         previous_questions = [5, 9, 16, 17]
         res = self.client().post('/api/quizzes', \
-                                 json={"previousQuestions": previous_questions, \
+                                 json={"previous_questions": previous_questions, \
                                        "quiz_category": quiz_category})
 
         data = json.loads(res.data)
